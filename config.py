@@ -7,8 +7,6 @@ from common.constants import (
 )
 from validation.config import Config
 
-PATH_CONFIG_FILE.touch(exist_ok=True)
-
 
 def dump_config() -> Config:
     with open(PATH_CONFIG_FILE, "w") as config_file:
