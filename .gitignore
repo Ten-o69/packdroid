@@ -27,7 +27,7 @@ share/python-wheels/
 MANIFEST
 test/
 test.py
-raccoon/bin
+bin
 config.yaml
 manifest.txt
 apks/
