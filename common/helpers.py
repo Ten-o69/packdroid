@@ -1,5 +1,6 @@
 from pathlib import Path
 import sys
+import subprocess
 
 import requests
 from ten_utils.log import Logger
@@ -116,3 +117,33 @@ def download_file(url: str, path: Path | str) -> None:
         # tqdm shows progress bar in MB units, writing chunks into file
         for data in tqdm(rs.iter_content(chunk_size=chunk_size), total=num_bars, unit="MB", file=sys.stdout):
             f.write(data)
+
+
+import subprocess
+
+
+def run_local_cmd(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
+    """
+    Execute a local shell command using subprocess.run.
+
+    Args:
+        cmd (list[str]): Command and arguments to execute as a list.
+        check (bool, optional):
+            If True, raise CalledProcessError on non-zero exit code.
+            Defaults to True.
+
+    Returns:
+        subprocess.CompletedProcess: Result object containing execution details.
+
+    Notes:
+        - Logs the executed command at debug level.
+        - Uses text mode to return stdout/stderr as strings instead of bytes.
+        - Designed for local commands only; no shell=True is used to avoid security risks.
+    """
+    logger.debug("LOCAL CMD: " + " ".join(cmd))
+    return subprocess.run(
+        cmd,
+        check=check,
+        text=True
+    )
+
