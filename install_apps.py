@@ -1,17 +1,22 @@
 #!/usr/bin/env python3
 import subprocess
 import json
-import requests
 from pathlib import Path
 from datetime import datetime
 
+import requests
+from ten_utils.log import Logger
+
+from raccoon.command import Raccoon
+
 # Пути к инструментам
 ADB = "adb"
-JAVA = "java"
 RACCOON = "/home/rio/Downloads/raccoon-4.24.0.jar"  # укажи свой путь к raccoon.jar
 APK_DIR = Path("apks")
 
 DEVICE_SERIAL = None
+
+logger = Logger(__name__)
 
 # =================== УТИЛИТЫ ===================
 def log(msg):
@@ -25,11 +30,6 @@ def run_cmd(cmd, check=True, capture_output=False):
     full_cmd += cmd
     log("CMD: " + " ".join(full_cmd))
     return subprocess.run(full_cmd, check=check, capture_output=capture_output, text=True)
-
-def run_local_cmd(cmd, check=True):
-    """Запуск локальной команды (Java, curl и т.д.)"""
-    log("LOCAL CMD: " + " ".join(cmd))
-    return subprocess.run(cmd, check=check, text=True)
 
 # =================== ВЫБОР УСТРОЙСТВА ===================
 def select_device():
@@ -65,21 +65,24 @@ def download_with_raccoon(package: str) -> Path:
     """Скачивание ABB через Raccoon"""
     log(f"Скачиваю {package} через Raccoon ...")
     app_dir = APK_DIR / package
+    raccoon = Raccoon()
+
     app_dir.mkdir(parents=True, exist_ok=True)
 
-    cmd = [
-        JAVA, "-jar", RACCOON,
-        "--gpa-download", package,
-        "--gpa-download-dir", str(app_dir)
-    ]
-    run_local_cmd(cmd)
-
-    # рекурсивно ищем все apk
     apk_files = list(app_dir.rglob("*.apk"))
-    if not apk_files:
-        raise FileNotFoundError(f"Raccoon не скачал {package}")
 
-    log(f"Скачано {len(apk_files)} apk для {package}")
+    if not apk_files:
+        success_run = raccoon.download_apk(
+            package_name=package,
+            out_path=app_dir
+        )
+
+        # рекурсивно ищем все apk
+        apk_files = list(app_dir.rglob("*.apk"))
+        if not apk_files or success_run.returncode != 0:
+            logger.critical(f"Raccoon не скачал {package}")
+
+    logger.info(f"Скачано {len(apk_files)} apk для {package}")
     return app_dir
 
 def download_with_url(url: str, package: str) -> Path:
@@ -139,7 +142,7 @@ def install_apk(package: str, source: Path):
         log(f"❌ {package} НЕ установлено!")
 
 # =================== ОСНОВНОЙ ЦИКЛ ===================
-def main():
+def run_install():
     log("=== START ===")
     APK_DIR.mkdir(exist_ok=True)
 
@@ -158,6 +161,3 @@ def main():
             log(f"Ошибка для {package}: {e}")
 
     log("=== FINISHED ===")
-
-if __name__ == "__main__":
-    main()
