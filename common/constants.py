@@ -30,6 +30,9 @@ PATHS_CHECK_DEFAULT = [
     },
 ]
 
+# filename
+FILENAME_RACCOON_BIN = "raccoon.jar"
+
 # web link
 WEB_LINK_DEFAULT_DOWNLOAD_BIN_RACCOON = HttpUrl("https://www.dropbox.com/scl/fi/8np6usic1qu2xisgtbpsh/"
                                                 "raccoon-4.24.0.jar?rlkey=jqzyn25ptmearic4gddd2762y&st=yt4vzyzr&dl=1")
