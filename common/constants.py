@@ -5,13 +5,18 @@ from pydantic import HttpUrl
 
 # dir
 BASE_DIR = Path(__file__).parent.parent
-DIR_BIN_RACCOON = BASE_DIR / "raccoon" / "bin"
+DIR_BIN = BASE_DIR / "bin"
+DIR_BIN_RACCOON = DIR_BIN / "raccoon"
 DIR_APKS = BASE_DIR / "apks"
 
 # path
 PATH_CONFIG_FILE = BASE_DIR / "config.yaml"
 PATH_SOURCES_FILE = BASE_DIR / "sources.json"
 PATHS_CHECK_DEFAULT = [
+    {
+        "path": DIR_BIN,
+        "is_file": False,
+    },
     {
         "path": DIR_BIN_RACCOON,
         "is_file": False,
