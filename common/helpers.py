@@ -1,6 +1,8 @@
 from pathlib import Path
 import sys
 import subprocess
+import os
+from zipfile import ZipFile
 
 import requests
 from ten_utils.log import Logger
@@ -144,3 +146,35 @@ def run_local_cmd(cmd: list[str], check: bool = True) -> subprocess.CompletedPro
         text=True
     )
 
+
+def unzip(path_to_zip: Path | str, out_path: Path | str) -> None:
+    """
+    Extract the contents of a ZIP archive to a specified output directory.
+
+    Args:
+        path_to_zip (Path | str): Path to the ZIP file to be extracted.
+        out_path (Path | str): Target directory where files will be extracted.
+
+    Notes:
+        - Creates directories recursively if they do not exist.
+        - Skips directory entries inside the archive (only extracts files).
+        - Overwrites existing files with the same name.
+    """
+    path_to_zip = str_to_path(path_to_zip)
+    out_path = str_to_path(out_path)
+
+    with ZipFile(path_to_zip, "r") as zip_file:
+        for member in zip_file.namelist():
+            # Remove folder prefix, keep only the file name/relative path
+            filename = member.split("/", 1)[-1]
+
+            if not filename:
+                # Skip directory entries
+                continue
+
+            target_path = out_path / filename
+            os.makedirs(os.path.dirname(target_path), exist_ok=True)
+
+            # Extract file contents safely
+            with zip_file.open(member) as source, open(target_path, "wb") as target:
+                target.write(source.read())
