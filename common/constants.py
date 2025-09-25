@@ -1,10 +1,13 @@
 from pathlib import Path
+import platform
 
 from pydantic import HttpUrl
 
+# base
+BASE_DIR = Path(__file__).parent.parent
+BASE_SYSTEM = platform.system()
 
 # dir
-BASE_DIR = Path(__file__).parent.parent
 DIR_BIN = BASE_DIR / "bin"
 DIR_BIN_RACCOON = DIR_BIN / "raccoon"
 DIR_BIN_ADB = DIR_BIN / "adb"
@@ -20,6 +23,10 @@ PATHS_CHECK_DEFAULT = [
     },
     {
         "path": DIR_BIN_RACCOON,
+        "is_file": False,
+    },
+    {
+        "path": DIR_BIN_ADB,
         "is_file": False,
     },
     {
@@ -39,6 +46,8 @@ PATHS_CHECK_DEFAULT = [
 # filename
 FILENAME_RACCOON_BIN = "raccoon.jar"
 FILENAME_JAVA_BIN = "java"
+FILENAME_ADB_BIN_ZIP = "adb.zip"
+FILENAME_ADB_BIN = "adb.exe" if BASE_SYSTEM == "Windows" else "adb"
 
 # web link
 WEB_LINK_DEFAULT_DOWNLOAD_BIN_RACCOON: HttpUrl = HttpUrl("https://www.dropbox.com/scl/fi/8np6usic1qu2xisgtbpsh/"
