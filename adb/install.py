@@ -4,8 +4,9 @@ from common.constants import (
     DIR_BIN_ADB,
     FILENAME_ADB_BIN_ZIP,
     FILENAME_ADB_BIN,
+    BASE_SYSTEM,
 )
-from common.helpers import download_file, unzip
+from common.helpers import download_file, unzip, run_cmd
 from config import cfg_obj
 
 
@@ -40,3 +41,14 @@ def check_adb_install() -> None:
         finally:
             # Always remove the archive after extraction to save space
             os.remove(path_to_adb_bin_zip)
+
+        if BASE_SYSTEM == "Linux" or BASE_SYSTEM == "Darwin":
+            bin_paths = [str(path) for path in DIR_BIN_ADB.glob('*')]
+            cmd = ["chmod", "+x"]
+
+            for path in bin_paths:
+                run_cmd(
+                    cmd=cmd + [path],
+                    check=False,
+                    text=False,
+                )
