@@ -121,30 +121,49 @@ def download_file(url: str, path: Path | str) -> None:
             f.write(data)
 
 
-def run_cmd(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
+def run_cmd(
+        cmd: list[str],
+        check: bool = True,
+        check_output: bool = False,
+) -> subprocess.CompletedProcess | str:
     """
-    Execute a local shell command using subprocess.run.
+    Execute a local shell command with optional output capture.
 
     Args:
         cmd (list[str]): Command and arguments to execute as a list.
         check (bool, optional):
             If True, raise CalledProcessError on non-zero exit code.
             Defaults to True.
+        check_output (bool, optional):
+            If True, capture and return command output as a string
+            using subprocess.check_output.
+            If False, return a CompletedProcess object from subprocess.run.
+            Defaults to False.
 
     Returns:
-        subprocess.CompletedProcess: Result object containing execution details.
+        subprocess.CompletedProcess | str:
+            - CompletedProcess if check_output is False.
+            - Command output (str) if check_output is True.
 
     Notes:
         - Logs the executed command at debug level.
-        - Uses text mode to return stdout/stderr as strings instead of bytes.
-        - Designed for local commands only; no shell=True is used to avoid security risks.
+        - Uses text mode to ensure stdout/stderr are returned as strings.
+        - Safer than shell=True since the command is passed as a list.
     """
     logger.debug("LOCAL CMD: " + " ".join(cmd))
-    return subprocess.run(
-        cmd,
-        check=check,
-        text=True
-    )
+
+    if not check_output:
+        return subprocess.run(
+            cmd,
+            check=check,
+            text=True
+        )
+
+    else:
+        return subprocess.check_output(
+            cmd,
+            text=True
+        )
 
 
 def unzip(path_to_zip: Path | str, out_path: Path | str) -> None:
