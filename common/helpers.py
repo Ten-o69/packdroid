@@ -124,7 +124,9 @@ def download_file(url: str, path: Path | str) -> None:
 def run_cmd(
         cmd: list[str],
         check: bool = True,
+        text: bool = True,
         check_output: bool = False,
+        capture_output: bool = False,
 ) -> subprocess.CompletedProcess | str:
     """
     Execute a local shell command with optional output capture.
@@ -134,21 +136,29 @@ def run_cmd(
         check (bool, optional):
             If True, raise CalledProcessError on non-zero exit code.
             Defaults to True.
+        text (bool, optional):
+            If True, interpret stdout/stderr as strings (decoded).
+            If False, return raw bytes. Defaults to True.
         check_output (bool, optional):
-            If True, capture and return command output as a string
-            using subprocess.check_output.
-            If False, return a CompletedProcess object from subprocess.run.
-            Defaults to False.
+            If True, execute with subprocess.check_output() and return
+            command output as a string.
+            If False, execute with subprocess.run() and return a
+            CompletedProcess object. Defaults to False.
+        capture_output (bool, optional):
+            If True, capture stdout and stderr when using subprocess.run.
+            Ignored if check_output=True. Defaults to False.
 
     Returns:
         subprocess.CompletedProcess | str:
-            - CompletedProcess if check_output is False.
-            - Command output (str) if check_output is True.
+            - CompletedProcess object when check_output=False.
+            - Command output (str) when check_output=True.
 
     Notes:
         - Logs the executed command at debug level.
-        - Uses text mode to ensure stdout/stderr are returned as strings.
-        - Safer than shell=True since the command is passed as a list.
+        - Always passes arguments as a list, avoiding the security risks
+          of shell=True.
+        - Provides flexibility: choose between silent execution, capturing
+          output, or directly returning stdout as a string.
     """
     logger.debug("LOCAL CMD: " + " ".join(cmd))
 
@@ -156,13 +166,14 @@ def run_cmd(
         return subprocess.run(
             cmd,
             check=check,
-            text=True
+            text=text,
+            capture_output=capture_output,
         )
 
     else:
         return subprocess.check_output(
             cmd,
-            text=True
+            text=text,
         )
 
 
