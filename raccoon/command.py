@@ -5,7 +5,7 @@ from common.constants import (
     DIR_BIN_RACCOON,
     FILENAME_RACCOON_BIN,
 )
-from common.helpers import run_local_cmd
+from common.helpers import run_cmd
 from config import cfg_obj
 
 
@@ -48,7 +48,7 @@ class Raccoon:
 
         Notes:
             - Uses raccoon.jar with `--gpa-download` and `--gpa-download-dir`.
-            - Calls `run_local_cmd` to execute the command and log it.
+            - Calls `run_cmd` to execute the command and log it.
         """
         cmd = [
             *self.__command_base,
@@ -56,4 +56,4 @@ class Raccoon:
             "--gpa-download-dir", str(out_path),
         ]
 
-        return run_local_cmd(cmd)
+        return run_cmd(cmd)

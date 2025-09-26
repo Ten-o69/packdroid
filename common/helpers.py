@@ -121,7 +121,7 @@ def download_file(url: str, path: Path | str) -> None:
             f.write(data)
 
 
-def run_local_cmd(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
+def run_cmd(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
     """
     Execute a local shell command using subprocess.run.
 
