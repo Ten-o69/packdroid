@@ -15,7 +15,7 @@ DIR_APKS = BASE_DIR / "apks"
 
 # path
 PATH_CONFIG_FILE = BASE_DIR / "config.yaml"
-PATH_SOURCES_FILE = BASE_DIR / "sources.json"
+PATH_SOURCES_FILE = BASE_DIR / "sources.yaml"
 PATHS_CHECK_DEFAULT = [
     {
         "path": DIR_BIN,
@@ -51,7 +51,8 @@ FILENAME_ADB_BIN = "adb.exe" if BASE_SYSTEM == "Windows" else "adb"
 
 # web link
 WEB_LINK_DEFAULT_DOWNLOAD_BIN_RACCOON: HttpUrl = HttpUrl("https://www.dropbox.com/scl/fi/8np6usic1qu2xisgtbpsh/"
-                                                         "raccoon-4.24.0.jar?rlkey=jqzyn25ptmearic4gddd2762y&st=yt4vzyzr&dl=1")
+                                                         "raccoon-4.24.0.jar?rlkey="
+                                                         "jqzyn25ptmearic4gddd2762y&st=yt4vzyzr&dl=1")
 WEB_LINK_DEFAULT_DOWNLOAD_BIN_ADB_FOR_WINDOWS: HttpUrl = HttpUrl("https://www.dropbox.com/scl/fi/48ra9r4rgliw1zt5pwe7z/"
                                                                  "platform-tools-latest-windows.zip?rlkey="
                                                                  "ayg3177h9fd9dqkd2nse6kwqa&st=24n561c3&dl=1")
