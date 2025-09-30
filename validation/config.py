@@ -11,7 +11,7 @@ from common.constants import (
     WEB_LINK_DEFAULT_DOWNLOAD_BIN_RACCOON,
     FILENAME_JAVA_BIN,
 )
-from .utils import get_adb_bin_link
+from ._utils import get_adb_bin_link
 
 
 class Config(BaseModel):
