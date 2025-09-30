@@ -8,7 +8,7 @@ from common.constants import (
     FILENAME_ADB_BIN,
 )
 from common.helpers import str_to_path, run_cmd
-from .decorators import check_device_set
+from ._decorators import check_device_set
 
 logger = Logger(__name__)
 

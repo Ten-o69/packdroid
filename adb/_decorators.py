@@ -1,4 +1,3 @@
-from subprocess import CompletedProcess
 from typing import Callable
 from functools import wraps
 
@@ -24,12 +23,13 @@ def check_device_set(func: Callable) -> Callable:
         before executing.
     """
     @wraps(func)
-    def wrapper(*args, **kwargs) -> CompletedProcess | str | None:
+    def wrapper(*args, **kwargs):
         self = args[0]
         output = None
 
         if self.device_set:
             output = func(*args, **kwargs)
+
         else:
             logger.critical(
                 "The device is not set! "
