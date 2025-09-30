@@ -3,10 +3,14 @@ import sys
 import subprocess
 import os
 from zipfile import ZipFile
+from typing import Type
+import json
 
 import requests
 from ten_utils.log import Logger
 from tqdm import tqdm
+from pydantic import BaseModel
+import yaml
 
 from common.constants import (
     PATHS_CHECK_DEFAULT,
@@ -208,3 +212,92 @@ def unzip(path_to_zip: Path | str, out_path: Path | str) -> None:
             # Extract file contents safely
             with zip_file.open(member) as source, open(target_path, "wb") as target:
                 target.write(source.read())
+
+
+def yaml_dump_with_pydantic_model(
+        path_to_yaml: Path | str,
+        pydantic_model: Type[BaseModel],
+) -> BaseModel:
+    """
+    Serialize a Pydantic model (with default values) into a YAML file.
+
+    - Creates an instance of the given Pydantic model using default values.
+    - Converts the model to a dictionary via JSON serialization.
+    - Writes the dictionary into a YAML file at the given path.
+    - Returns the model instance for further use.
+
+    Args:
+        path_to_yaml (Path | str): Destination path for the YAML file.
+        pydantic_model (Type[BaseModel]): Any Pydantic model class.
+
+    Returns:
+        BaseModel: A newly created model instance with default values.
+
+    Notes:
+        - This function can be used to initialize YAML files for any schema.
+        - Useful as a schema-driven way to bootstrap new YAML documents.
+    """
+    with open(path_to_yaml, "w") as yaml_file:
+        data_obj = pydantic_model()
+
+        model_data = json.loads(data_obj.model_dump_json())
+        yaml.safe_dump(model_data, yaml_file, default_flow_style=False)
+
+    return data_obj
+
+
+def yaml_load_with_pydantic_model(
+        path_to_yaml: Path | str,
+        pydantic_model: Type[BaseModel]
+) -> BaseModel | None:
+    """
+    Load data from a YAML file and validate it with a Pydantic model.
+
+    Behavior:
+      - If the YAML file is empty, a new one will be created with default
+        values using `yaml_dump_with_pydantic_model`, and that model
+        instance will be returned.
+      - If the YAML contains invalid data types (not dict or list),
+        logs a critical error and returns None.
+      - If the YAML contains a list, the list will be broadcasted
+        into each field of the model.
+      - If the YAML contains a dict, it will be passed directly
+        into the model constructor.
+
+    Args:
+        path_to_yaml (Path | str): Path to the YAML file to load.
+        pydantic_model (Type[BaseModel]): Any Pydantic model class to validate against.
+
+    Returns:
+        BaseModel | None:
+            - Instance of the given Pydantic model with loaded data.
+            - None if the YAML format is invalid.
+
+    Notes:
+        - Works as a general-purpose bridge between YAML and Pydantic models.
+        - Ensures that YAML data always conforms to the given schema.
+        - Can be used for configs, manifests, datasets, or any structured YAML data.
+    """
+    with open(path_to_yaml, "r") as yaml_file:
+        data = yaml.safe_load(yaml_file)
+
+        if data is None:
+            return yaml_dump_with_pydantic_model(
+                path_to_yaml=path_to_yaml,
+                pydantic_model=pydantic_model,
+            )
+
+        elif not isinstance(data, (dict, list)):
+            logger.critical(f"Incorrect configuration format. Must be 'dict', not '{type(data)}'")
+            return None
+
+        elif isinstance(data, list):
+            data_dict = {}
+
+            for key in pydantic_model.model_fields.keys():
+                data_dict[key] = data
+
+            return pydantic_model(**data_dict)
+
+        else:
+            return pydantic_model(**data)
