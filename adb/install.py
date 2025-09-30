@@ -7,7 +7,7 @@ from common.constants import (
     BASE_SYSTEM,
 )
 from common.helpers import download_file, unzip, run_cmd
-from config import cfg_obj
+from config import config_obj
 
 
 def check_adb_install() -> None:
@@ -21,7 +21,7 @@ def check_adb_install() -> None:
         4. Clean up by deleting the downloaded ZIP file.
 
     Notes:
-        - Uses cfg_obj.adb_bin_link to determine the correct download URL.
+        - Uses config_obj.adb_bin_link to determine the correct download URL.
         - Extracted files will overwrite any existing ones inside DIR_BIN_ADB.
         - The ZIP file is always removed after extraction (even if unzip fails).
     """
@@ -30,7 +30,7 @@ def check_adb_install() -> None:
 
         # Download ADB binary archive from configured source
         download_file(
-            url=cfg_obj.adb_bin_link,
+            url=config_obj.adb_bin_link,
             path=path_to_adb_bin_zip,
         )
 
