@@ -9,7 +9,7 @@ from pydantic import (
 
 from common.constants import (
     WEB_LINK_DEFAULT_DOWNLOAD_BIN_RACCOON,
-    FILENAME_RACCOON_BIN,
+    FILENAME_JAVA_BIN,
 )
 from .utils import get_adb_bin_link
 
@@ -29,8 +29,8 @@ class Config(BaseModel):
 
         java_bin (str | FilePath):
             Path to the Java executable used to run raccoon.jar.
-            Defaults to FILENAME_RACCOON_BIN (can be overridden).
+            Defaults to FILENAME_JAVA_BIN (can be overridden).
     """
     raccoon_bin_link: HttpUrl = Field(default=WEB_LINK_DEFAULT_DOWNLOAD_BIN_RACCOON)
     adb_bin_link: HttpUrl = Field(default=get_adb_bin_link())
-    java_bin: Union[str, FilePath] = Field(default=FILENAME_RACCOON_BIN)
+    java_bin: Union[str, FilePath] = Field(default=FILENAME_JAVA_BIN)
