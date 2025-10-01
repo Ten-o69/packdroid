@@ -100,27 +100,64 @@ def resolve_source(
         logger.critical(f"Unknown source method: {entry.method}")
 
 
-def main() -> None:
+def check_installed_apps(sources: Sources) -> None:
     """
-    Entry point of the application.
+    Check which applications from the provided sources are installed on the connected device.
 
-    Workflow:
-        1. Ensure required binaries (Raccoon, ADB) are installed.
-        2. Select a connected Android device.
-        3. Load the `sources.yaml` file and validate it with Pydantic.
-        4. For each source entry:
-            - Resolve its APK source (Raccoon, URL, or local path).
-            - Install the APK(s) on the selected device.
-        5. Log success or errors for each package.
+    Args:
+        sources (Sources): Pydantic model containing a list of Source entries
+            (SourceRaccoon, SourceUrl, SourceLocal) to check for installation.
+
+    Returns:
+        None: Logs the status of each package instead of returning a value.
 
     Notes:
-        - This function orchestrates the full flow:
-          from configuration → APK retrieval → installation.
+        - Uses the global `adb` instance to query installed packages.
+        - Logs information messages if a package is already installed.
+        - Logs warnings if a package is not installed.
+        - Iterates over all entries in the `sources` list.
+    """
+    packages = adb.get_packages().stdout
+    entry: SourceRaccoon | SourceLocal | SourceRaccoon
+
+    for entry in sources:
+        if entry.package in packages:
+            logger.info(f"Package {entry.package} already installed")
+
+        else:
+            logger.warning(f"Package {entry.package} not installed")
+
+
+def main() -> None:
+    """
+    Entry point of the Packdroid application.
+
+    Workflow:
+        1. Ensure required binaries (Raccoon, ADB) are installed using
+           `check_raccoon_bin_install` and `check_adb_install`.
+        2. Prompt user to select a connected Android device if multiple devices are found.
+           - Automatically sets the device for ADB commands.
+        3. Load the `sources.yaml` file and validate it using Pydantic (`Sources` model).
+           - Ensures proper format and default creation if the file is missing.
+        4. Iterate over each source entry:
+            - Resolve APK source using `resolve_source`:
+                * `raccoon` → download ABB via Raccoon.
+                * `url` → download APK from a direct URL.
+                * `local` → use existing APKs in a folder.
+            - Install the APK(s) on the selected device:
+                * Single APK → `install_apk`
+                * Split APK/ABB → `install_split_apk`
+            - Log success or errors for each package.
+        5. Verify installation status for all sources using `check_installed_apps`.
+           - Logs whether each package is installed or missing.
+
+    Notes:
+        - This function orchestrates the full workflow: configuration → APK retrieval → installation → verification.
+        - Any critical errors (missing binaries, invalid sources, no devices) are logged with `logger.critical`.
+        - Designed to be run as a standalone script (`if __name__ == "__main__": main()`).
     """
     check_raccoon_bin_install()
     check_adb_install()
-
-    logger.info("=== START ===")
 
     select_device()
 
@@ -130,6 +167,9 @@ def main() -> None:
         pydantic_model=Sources
     )
 
+    if not sources_obj.sources:
+        logger.critical("No sources specified!")
+
     for entry in sources_obj.sources:
         try:
             source = resolve_source(entry)
@@ -138,7 +178,7 @@ def main() -> None:
         except Exception as e:
             logger.error(f"Error for {entry.package}: {e}")
 
-    logger.info("=== FINISHED ===")
+    check_installed_apps(sources_obj.sources)
 
 
 if __name__ == "__main__":

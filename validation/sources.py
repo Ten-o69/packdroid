@@ -4,6 +4,7 @@ from pathlib import Path
 from pydantic import (
     BaseModel,
     HttpUrl,
+    Field,
 )
 
 
@@ -63,4 +64,4 @@ class Sources(BaseModel):
             A list of source definitions, each describing
             how to obtain a particular package.
     """
-    sources: list[SourceRaccoon | SourceUrl | SourceLocal]
+    sources: list[SourceRaccoon | SourceUrl | SourceLocal] = Field(default=[])

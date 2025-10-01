@@ -82,20 +82,6 @@ def download_with_url(url: str, package: str) -> Path:
     return target
 
 
-def check_installed(package: str, adb: Adb) -> bool:
-    """
-    Check if a package is already installed on the connected device.
-
-    Args:
-        package (str): Package name to verify.
-        adb (Adb): Instance of Adb client.
-
-    Returns:
-        bool: True if the package is installed, False otherwise.
-    """
-    return package in adb.get_packages().stdout
-
-
 def install_apk(
         package: str,
         source: Path | str,
@@ -129,10 +115,3 @@ def install_apk(
 
     else:
         raise ValueError(f"Invalid source: {source}")
-
-    # Post-installation check
-    if check_installed(package, adb):
-        logger.info(f"✅ {package} successfully installed")
-
-    else:
-        logger.error(f"❌ {package} installation failed!")
